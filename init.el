@@ -4,7 +4,8 @@
 	     (let ((elapsed
 		    (float-time
 		     (time-subtract (current-time) emacs-start-time))))
-	       (message "Loading %s...done (%.3fs) [after-init]" ,load-file-name elapsed))) t)
+	       (message "Loading %s...done (%.3fs) [after-init]"
+			,load-file-name elapsed))) t)
 
 (setq gc-cons-threshold most-positive-fixnum ; 2^61
       gc-cons-percentage 0.6)
