@@ -1,3 +1,7 @@
 init.el~
 auto-save-list/
 elpa/
+.local/
+projectile-bookmarks.eld
+smex-items
+custom.el
