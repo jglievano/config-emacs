@@ -9,10 +9,10 @@
 (require 'cl-lib)
 (deftheme papercolor)
 
-(let ((colors '((fg1 "#eeeeee")
-		(fg2 "#eeeeee")
-		(fg3 "#eeeeee")
-		(fg4 "#eeeeee")
+(let ((colors '((fg1 "#d0d0d0")
+		(fg2 "#d0d0d0")
+		(fg3 "#d0d0d0")
+		(fg4 "#d0d0d0")
 		(bg1 "#1c1c1c")
 		(bg2 "#1c1c1c")
 		(bg3 "#1c1c1c")
@@ -22,12 +22,12 @@
 		(key2 "#af005f")
 		(key3 "#5faf00")
 		(builtin "#d7af00")
-		(keyword "#afd700")
+		(keyword "#00afaf")
 		(const "#d7af00")
-		(comment "#585858")
+		(comment "#808080")
 		(func "#d7875f")
 		(str "#af87d7")
-		(type "#ffaf00")
+		(type "#afd700")
 		(var "#ff5faf")
 		(warning "#00afaf")
 		(rainbow-1 "#5fafd7")
@@ -41,7 +41,48 @@
 		(rainbow-9 "#144f6c")
 		(rainbow-10 "#10435d")
 		(eph-verbatim "5f8787")
-		(eph-code "#5fafd7")))
+		(eph-code "#5fafd7")
+
+		(c-00 "#1c1c1c") ; cursor_fg, cursorlinenr_bg, linenumber_bg, vertsplit_bg, statusline_active_fg, todo_bg, wildmenu_fg
+		(c-01 "#af005f") ; error_fg, diffdelete_fg
+		(c-02 "#5faf00")
+		(c-03 "#d7af5f")
+		(c-04 "#5fafd7")
+		(c-05 "#808080")
+		(c-06 "#d7875f")
+		(c-07 "#d0d0d0") ; diffchange_fg
+		(c-08 "#585858") ; linenumber_fg, tabline_inactive_vg, buftabline_active_bg, buftabline_inactive_bg
+		(c-09 "#5faf5f")
+		(c-10 "#afd700") ; wildmenu_bg
+		(c-11 "#af87d7")
+		(c-12 "#ffaf00")
+		(c-13 "#ff5faf")
+		(c-14 "#00afaf") ; tabline_active_bg, buftabline_current_bg, buftabline_active_fg
+		(c-15 "#5f8787") ; vertsplit_fg, statusline_active_bg
+		(c-16 "#5fafd7")
+		(c-17 "#d7af00")
+		(c-18 "#c6c6c6") ; cursor_bg, popupmenu_fg, matchparen_fg
+		(c-19 "#303030") ; cursorline, cursorcolumn, popupmenu_bg
+		(c-20 "#ffff00") ; cursorlinenr_fg
+		(c-21 "#000000") ; search_fg, visual_fg
+		(c-22 "#00875f") ; search_bg
+		(c-23 "#bcbcbc") ; statusline_inactive_fg, tabline_inactive_fg, buftabline_inactive_fg
+		(c-24 "#3a3a3a") ; statusline_inactive_bg
+		(c-25 "#ff8700") ; todo_fg
+		(c-26 "#5f0000") ; error_bg, spellbad, diffdelete_bg
+		(c-27 "#4e4e4e") ; matchparen_bg
+		(c-28 "#8787af") ; visual_bg
+		(c-29 "#d787ff") ; folded_fg
+		(c-30 "#5f005f") ; folded_bg, spellcap
+		(c-31 "#005f00") ; spellrare, diffadd_bg
+		(c-32 "#00005f") ; spelllocal
+		(c-33 "#87d700") ; diffadd_fg
+		(c-34 "#5fffff") ; difftext_fg
+		(c-35 "#008787") ; difftext_bg
+		(c-36 "#005f5f") ; diffchange_bg
+		(c-37 "#262626") ; tabline_bg, buftabline_bg
+		(c-38 "#121212") ; tabline_active_fg, buftabline_current_fg
+      		))
       (faces '(;; default
 	       (cursor :background ,fg3)
 	       (default :background ,bg1 :foreground ,fg1)

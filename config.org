@@ -1,8 +1,19 @@
 #+TITLE: My Emacs Configuration
 
-* Initialization steps
+* General
 
-** Package archives
+** Functions
+
+#+begin_src emacs-lisp
+  (defun woof-add-exec-path (path)
+    "Adds PATH to environment's PATH."
+    (setenv "PATH" (concat (getenv "PATH") ":" path))
+    (setq exec-path (append exec-path (list path))))
+#+end_src
+
+** Initialization steps
+
+*** Package archives
 
 #+begin_src emacs-lisp
   (require 'package)
@@ -14,7 +25,7 @@
   (package-initialize)
 #+end_src
 
-** Better settings
+*** Better settings
 
 #+begin_src emacs-lisp
   (setq ad-redefinition-action 'accept
@@ -22,7 +33,7 @@
 	create-lockfiles nil)
 #+end_src
 
-** Emacs local dir
+*** Emacs local dir
 
 #+begin_src emacs-lisp
   (let ((local-dir (expand-file-name ".local/" user-emacs-directory)))
@@ -33,7 +44,7 @@
 	  server-auth-dir (concat local-dir "server/")))
 #+end_src
 
-* UI essentials
+** UI essentials
 
 #+begin_src emacs-lisp
   ;; Needed to allow full-height screen.
@@ -55,7 +66,7 @@
 	ring-bell-function 'ignore)
 #+end_src
 
-** Fonts
+*** Fonts
 
 #+begin_src emacs-lisp
   (when (window-system)
@@ -68,7 +79,7 @@
      t 'symbol (font-spec :family "Apple Color Emoji") nil 'prepend))
 #+end_src
 
-** Theme
+*** Theme
 
 #+begin_src emacs-lisp
   (unless (package-installed-p 'dracula-theme)
@@ -77,7 +88,7 @@
   (load-theme 'papercolor t)
 #+end_src
 
-* Magit
+** Magit
 
 #+begin_src emacs-lisp
   (unless (package-installed-p 'magit)
@@ -85,7 +96,7 @@
   (require 'magit)
 #+end_src
 
-* Projectile
+** Projectile
 
 #+begin_src emacs-lisp
   (unless (package-installed-p 'projectile)
@@ -95,7 +106,7 @@
   (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
 #+end_src
 
-* Rainbow delimiters
+** Rainbow delimiters
 
 #+begin_src emacs-lisp
   (unless (package-installed-p 'rainbow-delimiters)
@@ -103,7 +114,15 @@
   (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
 #+end_src
 
-* Smex
+** Rainbow mode
+
+#+begin_src emacs-lisp
+  (unless (package-installed-p 'rainbow-mode)
+    (package-install 'rainbow-mode))
+  (add-hook 'prog-mode-hook #'rainbow-mode)
+#+end_src
+
+** Smex
 
 #+begin_src emacs-lisp
   (unless (package-installed-p 'smex)
@@ -114,7 +133,7 @@
   (global-set-key (kbd "M-X") 'smex-major-mode-commands)
 #+end_src
 
-* Which-key
+** Which-key
 
 #+begin_src emacs-lisp
   (unless (package-installed-p 'which-key)
@@ -129,4 +148,53 @@
   (which-key-mode)
   (set-face-attribute 'which-key-local-map-description-face nil :weight 'bold)
   (which-key-setup-side-window-bottom)
+#+end_src
+
+* Development
+
+** Utils
+
+#+begin_src emacs-lisp
+  (unless (package-installed-p 'flycheck)
+    (package-install 'flycheck))
+  (add-hook 'prog-mode-hook #'flycheck-mode)
+  (defun woof-disable-flycheck-in-org-src-block ()
+    (setq-local flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
+  (add-hook 'org-src-mode-hook 'woof-disable-flycheck-in-org-src-block)
+
+  (unless (package-installed-p 'company)
+    (package-install 'company))
+  (add-hook 'prog-mode-hook #'company-mode)
+  (setq company-tooltip-align-annotations t
+	company-minimum-prefix-length 1)
+
+  (unless (package-installed-p 'lsp-mode)
+    (package-install 'lsp-mode))
+  (require 'lsp-mode)
+
+  (unless (package-installed-p 'lsp-ui)
+    (package-install 'lsp-ui))
+  (require 'lsp-ui)
+#+end_src
+
+** Rust
+
+#+begin_src emacs-lisp
+  (defvar cargo-path (expand-file-name ".cargo/bin" "~/"))
+  (woof-add-exec-path cargo-path)
+
+  (unless (package-installed-p 'toml-mode)
+    (package-install 'toml-mode))
+
+  (unless (package-installed-p 'rust-mode)
+    (package-install 'rust-mode))
+  (add-hook 'rust-mode-hook #'lsp-deferred)
+
+  (unless (package-installed-p 'cargo)
+    (package-install 'cargo))
+  (add-hook 'rust-mode-hook #'cargo-minor-mode)
+
+  (unless (package-installed-p 'flycheck-rust)
+    (package-install 'flycheck-rust))
+  (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)
 #+end_src

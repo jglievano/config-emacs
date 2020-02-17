@@ -7,3 +7,5 @@ smex-items
 custom.el
 config.el
 transient/
+.lsp-session-v1
+eshell/
