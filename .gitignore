@@ -5,3 +5,4 @@ elpa/
 projectile-bookmarks.eld
 smex-items
 custom.el
+config.el
