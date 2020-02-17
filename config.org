@@ -73,7 +73,8 @@
 #+begin_src emacs-lisp
   (unless (package-installed-p 'dracula-theme)
     (package-install 'dracula-theme))
-  (load-theme 'dracula t)
+  ;(load-theme 'dracula t)
+  (load-theme 'papercolor t)
 #+end_src
 
 * Magit
@@ -92,6 +93,14 @@
   (projectile-mode +1)
   (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
   (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+#+end_src
+
+* Rainbow delimiters
+
+#+begin_src emacs-lisp
+  (unless (package-installed-p 'rainbow-delimiters)
+      (package-install 'rainbow-delimiters))
+  (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
 #+end_src
 
 * Smex
