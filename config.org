@@ -5,6 +5,11 @@
 ** Functions
 
 #+begin_src emacs-lisp
+  (defun woof-install-if-needed (pkg)
+    "Installs PKG if not installed yet."
+    (unless (package-installed-p pkg)
+      (package-install pkg)))
+
   (defun woof-add-exec-path (path)
     "Adds PATH to environment's PATH."
     (setenv "PATH" (concat (getenv "PATH") ":" path))
@@ -82,25 +87,21 @@
 *** Theme
 
 #+begin_src emacs-lisp
-  (unless (package-installed-p 'dracula-theme)
-    (package-install 'dracula-theme))
-  ;(load-theme 'dracula t)
   (load-theme 'papercolor t)
 #+end_src
 
 ** Magit
 
 #+begin_src emacs-lisp
-  (unless (package-installed-p 'magit)
-    (package-install 'magit))
+  (woof-install-if-needed 'magit)
   (require 'magit)
 #+end_src
 
 ** Projectile
 
 #+begin_src emacs-lisp
-  (unless (package-installed-p 'projectile)
-    (package-install 'projectile))
+  (woof-install-if-needed 'projectile)
+
   (projectile-mode +1)
   (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
   (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
@@ -109,24 +110,22 @@
 ** Rainbow delimiters
 
 #+begin_src emacs-lisp
-  (unless (package-installed-p 'rainbow-delimiters)
-      (package-install 'rainbow-delimiters))
+  (woof-install-if-needed 'rainbow-delimiters)
   (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
 #+end_src
 
 ** Rainbow mode
 
 #+begin_src emacs-lisp
-  (unless (package-installed-p 'rainbow-mode)
-    (package-install 'rainbow-mode))
+  (woof-install-if-needed 'rainbow-mode)
   (add-hook 'prog-mode-hook #'rainbow-mode)
 #+end_src
 
 ** Smex
 
 #+begin_src emacs-lisp
-  (unless (package-installed-p 'smex)
-    (package-install 'smex))
+  (woof-install-if-needed 'smex)
+
   (require 'smex)
   (smex-initialize)
   (global-set-key (kbd "M-x") 'smex)
@@ -136,8 +135,8 @@
 ** Which-key
 
 #+begin_src emacs-lisp
-  (unless (package-installed-p 'which-key)
-    (package-install 'which-key))
+  (woof-install-if-needed 'which-key)
+
   (require 'which-key)
   (setq which-key-add-column-padding 1
 	which-key-idle-delay 0.5
@@ -155,26 +154,28 @@
 ** Utils
 
 #+begin_src emacs-lisp
-  (unless (package-installed-p 'flycheck)
-    (package-install 'flycheck))
-  (add-hook 'prog-mode-hook #'flycheck-mode)
+  (mapc 'woof-install-if-needed
+	'(flycheck
+	  company
+	  lsp-mode
+	  lsp-ui
+	  company-lsp))
+
+  (require 'lsp-mode)
+  (require 'lsp-ui)
+  (require 'company-lsp)
+
   (defun woof-disable-flycheck-in-org-src-block ()
     (setq-local flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
-  (add-hook 'org-src-mode-hook 'woof-disable-flycheck-in-org-src-block)
 
-  (unless (package-installed-p 'company)
-    (package-install 'company))
+  (add-hook 'prog-mode-hook #'flycheck-mode)
+  (add-hook 'org-src-mode-hook 'woof-disable-flycheck-in-org-src-block)
   (add-hook 'prog-mode-hook #'company-mode)
+
   (setq company-tooltip-align-annotations t
 	company-minimum-prefix-length 1)
 
-  (unless (package-installed-p 'lsp-mode)
-    (package-install 'lsp-mode))
-  (require 'lsp-mode)
-
-  (unless (package-installed-p 'lsp-ui)
-    (package-install 'lsp-ui))
-  (require 'lsp-ui)
+  (push 'company-lsp company-backends)
 #+end_src
 
 ** Rust
@@ -183,18 +184,13 @@
   (defvar cargo-path (expand-file-name ".cargo/bin" "~/"))
   (woof-add-exec-path cargo-path)
 
-  (unless (package-installed-p 'toml-mode)
-    (package-install 'toml-mode))
+  (mapc 'woof-install-if-needed
+	'(toml-mode
+	  rust-mode
+	  cargo
+	  flycheck-rust))
 
-  (unless (package-installed-p 'rust-mode)
-    (package-install 'rust-mode))
   (add-hook 'rust-mode-hook #'lsp-deferred)
-
-  (unless (package-installed-p 'cargo)
-    (package-install 'cargo))
   (add-hook 'rust-mode-hook #'cargo-minor-mode)
-
-  (unless (package-installed-p 'flycheck-rust)
-    (package-install 'flycheck-rust))
   (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)
 #+end_src
