@@ -49,9 +49,29 @@
 	  server-auth-dir (concat local-dir "server/")))
 #+end_src
 
+*** Exec path
+
+#+begin_src emacs-lisp
+  (if (memq window-system '(mac ns))
+      (progn
+	(woof-install-if-needed 'exec-path-from-shell)
+	(setq exec-path-from-shell-check-startup-files nil)
+	(exec-path-from-shell-initialize))
+    nil)
+
+  (setenv "PATH"
+	  (concat (getenv "PATH")
+		  (expand-file-name "~/.config/nvm/versions/node/v13.8.0/bin")))
+  (setq exec-path
+	(append exec-path
+		'((expand-file-name "~/.config/nvm/versions/node/v13.8.0/bin"))))
+#+end_src
+
 ** UI essentials
 
 #+begin_src emacs-lisp
+  (woof-install-if-needed 'all-the-icons)
+
   ;; Needed to allow full-height screen.
   (setq frame-resize-pixelwise t)
 
@@ -90,6 +110,88 @@
   (load-theme 'papercolor t)
 #+end_src
 
+** Eshell
+
+#+begin_src emacs-lisp
+  (if (featurep 'cl-lib)
+      (require 'cl-lib)
+    (require 'cl))
+
+  (defun woof-shortened-path (path max-len)
+    "Return a modified version of PATH, replacing some components
+  with single characters starting from the left to try and get the
+  path down to MAX-LEN."
+    (let* ((components (split-string (abbreviate-file-name path) "/"))
+	   (len (+ (1- (length components))
+		   (cl-reduce '+ components :key 'length)))
+	   (str ""))
+      (while (and (> len max-len)
+		  (cdr components))
+	(stq str (concat str (if (= 0 (length (car components)))
+				 "/"
+			       (string (elt (car components) 0) ?/)))
+	     len (- len (1- (length (car components))))
+	     components (cdr components)))
+      (concat str (cl-reduce (lambda (a b) (concat a "/" b)) components))))
+
+  (defun woof-with-face (str &rest face-plist)
+    "Propertize FACE-PLIST to STR."
+    (propertize str 'face face-plist))
+
+  (defun woof-vc-prompt-info ()
+    "String printed in eshell prompt for version control."
+    (if (ignore-errors (vc-responsible-backend default-directory))
+	(format "%s %s\n"
+		(all-the-icons-octicon "git-branch" :height 0.8 :v-adjust 0.1)
+		(woof-with-face (magit-get-current-branch) `(:foreground "#b8bb26")))
+      ""))
+
+  (setq eshell-prompt-function
+	(lambda ()
+	  (format "\n%s[%s@%s %s]%s "
+		  (woof-vc-prompt-info)
+		  (woof-with-face user-login-name `(:foreground "#fabd2f"))
+		  (woof-with-face system-name `(:foreground "#cc241d"))
+		  (woof-with-face (woof-shortened-path (eshell/pwd) 40) `(:foreground "#83a598"))
+		  (if (= (user-uid) 0) "#" "$"))))
+
+  (setq eshell-hist-ignoredups t
+	eshell-highlight-prompt nil
+	eshell-cmpl-cycle-completions nil
+	eshell-cmpl-ignore-case t
+	eshell-ask-to-save-history 'always
+	eshell-prompt-regexp "^[^#$\n]*[#$] ")
+#+end_src
+
+** Swiper (and Ivy, Counsel)
+
+#+begin_src emacs-lisp
+  (mapc 'woof-install-if-needed
+	'(counsel
+	  ivy
+	  swiper))
+
+  (ivy-mode 1)
+  (setq ivy-use-virtual-buffers t
+	enable-recursive-minibuffers t)
+  (global-set-key "\C-s" 'swiper)
+  (global-set-key (kbd "C-c C-r") 'ivy-resume)
+  (global-set-key (kbd "<f6>") 'ivy-resume)
+  (global-set-key (kbd "M-x") 'counsel-M-x)
+  (global-set-key (kbd "C-x C-f") 'counsel-find-file)
+  (global-set-key (kbd "<f1> f") 'counsel-describe-function)
+  (global-set-key (kbd "<f1> v") 'counsel-describe-variable)
+  (global-set-key (kbd "<f1> l") 'counsel-find-library)
+  (global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
+  (global-set-key (kbd "<f2> u") 'counsel-unicode-char)
+  (global-set-key (kbd "C-c g") 'counsel-git)
+  (global-set-key (kbd "C-c j") 'counsel-git-grep)
+  (global-set-key (kbd "C-c k") 'counsel-ag)
+  (global-set-key (kbd "C-x l") 'counsel-locate)
+  (global-set-key (kbd "C-S-o") 'counsel-rhythmbox)
+  (define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history)
+#+end_src
+
 ** Magit
 
 #+begin_src emacs-lisp
@@ -100,9 +202,12 @@
 ** Projectile
 
 #+begin_src emacs-lisp
-  (woof-install-if-needed 'projectile)
+  (mapc 'woof-install-if-needed
+	'(projectile
+	  counsel-projectile))
 
   (projectile-mode +1)
+  (counsel-projectile-mode)
   (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
   (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
 #+end_src
@@ -157,12 +262,17 @@
   (mapc 'woof-install-if-needed
 	'(flycheck
 	  company
+	  dap-mode
+	  lsp-ivy
 	  lsp-mode
+	  lsp-treemacs
 	  lsp-ui
 	  company-lsp))
 
   (require 'lsp-mode)
   (require 'lsp-ui)
+  (require 'lsp-ivy-workspace-symbol)
+  (require 'lsp-treemacs-errors-list)
   (require 'company-lsp)
 
   (defun woof-disable-flycheck-in-org-src-block ()
@@ -176,6 +286,12 @@
 	company-minimum-prefix-length 1)
 
   (push 'company-lsp company-backends)
+#+end_src
+
+** Bash
+
+#+begin_src emacs-lisp
+  (add-hook 'shell-mode-hook #'lsp-deferred)
 #+end_src
 
 ** Rust

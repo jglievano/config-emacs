@@ -9,3 +9,4 @@ config.el
 transient/
 .lsp-session-v1
 eshell/
+recentf
