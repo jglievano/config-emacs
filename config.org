@@ -80,6 +80,7 @@
 
 #+begin_src emacs-lisp
   (wuff-install-if-needed 'all-the-icons)
+  (require 'all-the-icons)
 
   ;; Needed to allow full-height screen.
   (setq frame-resize-pixelwise t)
