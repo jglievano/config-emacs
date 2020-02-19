@@ -101,10 +101,13 @@
                (region :background ,str :foreground ,bg1)
                (show-paren-match-face :background ,warning)
                (trailing-whitespace :foreground nil :background ,warning)
-               (vertical-border :foreground ,bg2)
+               (vertical-border :foreground ,c-15)
                (warning :foreground ,warning)
                (whitespace-trailing :inherit trailing-whitespace)
                (header-line :background ,bg1)
+     	       ;; modeline
+	       (mode-line :foreground ,c-28 :background ,c-37)
+	       (mode-line-inactive :foreground ,c-24 :background ,c-37)
                ;; syntax
                (font-lock-builtin-face :foreground ,builtin)
                (font-lock-comment-face :foreground ,comment)
