@@ -1,22 +1,29 @@
 #+TITLE: My Emacs Configuration
+#+AUTHOR: Gabriel Lievano
+#+DATE: 2020-02-18 sam.
 
-* General
-
-** Functions
+* Functions
 
 #+begin_src emacs-lisp
-  (defun woof-install-if-needed (pkg)
+  (defun wuff-what-face (pos)
+    "Get font face under POS."
+    (interactive "d")
+    (let ((face (or (get-char-property (point) 'read-face-name)
+		    (get-char-property (point) 'face))))
+      (if face (message "Face: %s" face) (message "No face at %d" pos))))
+
+  (defun wuff-install-if-needed (pkg)
     "Installs PKG if not installed yet."
     (unless (package-installed-p pkg)
       (package-install pkg)))
 
-  (defun woof-add-exec-path (path)
+  (defun wuff-add-exec-path (path)
     "Adds PATH to environment's PATH."
     (setenv "PATH" (concat (getenv "PATH") ":" path))
     (setq exec-path (append exec-path (list path))))
 #+end_src
 
-** Initialization steps
+* Initialization
 
 *** Package archives
 
@@ -54,7 +61,7 @@
 #+begin_src emacs-lisp
   (if (memq window-system '(mac ns))
       (progn
-	(woof-install-if-needed 'exec-path-from-shell)
+	(wuff-install-if-needed 'exec-path-from-shell)
 	(setq exec-path-from-shell-check-startup-files nil)
 	(exec-path-from-shell-initialize))
     nil)
@@ -67,10 +74,12 @@
 		'((expand-file-name "~/.config/nvm/versions/node/v13.8.0/bin"))))
 #+end_src
 
+* General
+
 ** UI essentials
 
 #+begin_src emacs-lisp
-  (woof-install-if-needed 'all-the-icons)
+  (wuff-install-if-needed 'all-the-icons)
 
   ;; Needed to allow full-height screen.
   (setq frame-resize-pixelwise t)
@@ -117,7 +126,7 @@
       (require 'cl-lib)
     (require 'cl))
 
-  (defun woof-shortened-path (path max-len)
+  (defun wuff-shortened-path (path max-len)
     "Return a modified version of PATH, replacing some components
   with single characters starting from the left to try and get the
   path down to MAX-LEN."
@@ -134,25 +143,25 @@
 	     components (cdr components)))
       (concat str (cl-reduce (lambda (a b) (concat a "/" b)) components))))
 
-  (defun woof-with-face (str &rest face-plist)
+  (defun wuff-with-face (str &rest face-plist)
     "Propertize FACE-PLIST to STR."
     (propertize str 'face face-plist))
 
-  (defun woof-vc-prompt-info ()
+  (defun wuff-vc-prompt-info ()
     "String printed in eshell prompt for version control."
     (if (ignore-errors (vc-responsible-backend default-directory))
 	(format "%s %s\n"
 		(all-the-icons-octicon "git-branch" :height 0.8 :v-adjust 0.1)
-		(woof-with-face (magit-get-current-branch) `(:foreground "#b8bb26")))
+		(wuff-with-face (magit-get-current-branch) `(:foreground "#b8bb26")))
       ""))
 
   (setq eshell-prompt-function
 	(lambda ()
 	  (format "\n%s[%s@%s %s]%s "
-		  (woof-vc-prompt-info)
-		  (woof-with-face user-login-name `(:foreground "#fabd2f"))
-		  (woof-with-face system-name `(:foreground "#cc241d"))
-		  (woof-with-face (woof-shortened-path (eshell/pwd) 40) `(:foreground "#83a598"))
+		  (wuff-vc-prompt-info)
+		  (wuff-with-face user-login-name `(:foreground "#fabd2f"))
+		  (wuff-with-face system-name `(:foreground "#cc241d"))
+		  (wuff-with-face (wuff-shortened-path (eshell/pwd) 40) `(:foreground "#83a598"))
 		  (if (= (user-uid) 0) "#" "$"))))
 
   (setq eshell-hist-ignoredups t
@@ -166,7 +175,7 @@
 ** Swiper (and Ivy, Counsel)
 
 #+begin_src emacs-lisp
-  (mapc 'woof-install-if-needed
+  (mapc 'wuff-install-if-needed
 	'(counsel
 	  ivy
 	  swiper))
@@ -195,14 +204,14 @@
 ** Magit
 
 #+begin_src emacs-lisp
-  (woof-install-if-needed 'magit)
+  (wuff-install-if-needed 'magit)
   (require 'magit)
 #+end_src
 
 ** Projectile
 
 #+begin_src emacs-lisp
-  (mapc 'woof-install-if-needed
+  (mapc 'wuff-install-if-needed
 	'(projectile
 	  counsel-projectile))
 
@@ -215,21 +224,21 @@
 ** Rainbow delimiters
 
 #+begin_src emacs-lisp
-  (woof-install-if-needed 'rainbow-delimiters)
+  (wuff-install-if-needed 'rainbow-delimiters)
   (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
 #+end_src
 
 ** Rainbow mode
 
 #+begin_src emacs-lisp
-  (woof-install-if-needed 'rainbow-mode)
+  (wuff-install-if-needed 'rainbow-mode)
   (add-hook 'prog-mode-hook #'rainbow-mode)
 #+end_src
 
 ** Smex
 
 #+begin_src emacs-lisp
-  (woof-install-if-needed 'smex)
+  (wuff-install-if-needed 'smex)
 
   (require 'smex)
   (smex-initialize)
@@ -240,7 +249,7 @@
 ** Which-key
 
 #+begin_src emacs-lisp
-  (woof-install-if-needed 'which-key)
+  (wuff-install-if-needed 'which-key)
 
   (require 'which-key)
   (setq which-key-add-column-padding 1
@@ -259,7 +268,7 @@
 ** Utils
 
 #+begin_src emacs-lisp
-  (mapc 'woof-install-if-needed
+  (mapc 'wuff-install-if-needed
 	'(flycheck
 	  company
 	  dap-mode
@@ -271,15 +280,13 @@
 
   (require 'lsp-mode)
   (require 'lsp-ui)
-  (require 'lsp-ivy-workspace-symbol)
-  (require 'lsp-treemacs-errors-list)
   (require 'company-lsp)
 
-  (defun woof-disable-flycheck-in-org-src-block ()
+  (defun wuff-disable-flycheck-in-org-src-block ()
     (setq-local flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
 
   (add-hook 'prog-mode-hook #'flycheck-mode)
-  (add-hook 'org-src-mode-hook 'woof-disable-flycheck-in-org-src-block)
+  (add-hook 'org-src-mode-hook 'wuff-disable-flycheck-in-org-src-block)
   (add-hook 'prog-mode-hook #'company-mode)
 
   (setq company-tooltip-align-annotations t
@@ -294,13 +301,24 @@
   (add-hook 'shell-mode-hook #'lsp-deferred)
 #+end_src
 
+** Plantuml
+
+#+begin_src emacs-lisp
+  (wuff-install-if-needed 'plantuml-mode)
+
+  (setq plantuml-jar-path (expand-file-name "~/.local/bin/plantuml.1.2020.0.jar")
+	plantuml-default-exec-mode 'jar)
+
+  (add-to-list 'auto-mode-alist '("\\.uml\\'" . plantuml-mode))
+#+end_src
+
 ** Rust
 
 #+begin_src emacs-lisp
   (defvar cargo-path (expand-file-name ".cargo/bin" "~/"))
-  (woof-add-exec-path cargo-path)
+  (wuff-add-exec-path cargo-path)
 
-  (mapc 'woof-install-if-needed
+  (mapc 'wuff-install-if-needed
 	'(toml-mode
 	  rust-mode
 	  cargo
@@ -309,4 +327,12 @@
   (add-hook 'rust-mode-hook #'lsp-deferred)
   (add-hook 'rust-mode-hook #'cargo-minor-mode)
   (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)
+#+end_src
+* Org-mode
+
+#+begin_src emacs-lisp
+  (setq org-todo-keywords '((sequence "todo(t)" "started(s)" "waiting(w@/!)" "someday(.)"
+				      "|"
+				      "done(x!)" "cancelled(c@)")
+			    (sequence "note(n)")))
 #+end_src
