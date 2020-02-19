@@ -328,6 +328,13 @@
   (add-hook 'rust-mode-hook #'cargo-minor-mode)
   (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)
 #+end_src
+** Swift
+
+#+begin_src emacs-lisp
+  (wuff-install-if-needed 'swift-mode)
+  (add-to-list 'auto-mode-alist '("\\.swift\\'" . swift-mode))
+#+end_src
+
 * Org-mode
 
 #+begin_src emacs-lisp
