@@ -323,22 +323,33 @@
 ** C++
 
 #+begin_src emacs-lisp
-  (mapc 'wuff-install-if-needed
-	'(cc-mode
-	  ccls
-	  google-c-style))
+  (use-package cc-mode
+    :config
+    (setq
+     c-basic-offset 2
+     c-default-style "linux"
+     ))
 
-  (setq
-   c-basic-offset 2
-   c-default-style "linux"
-   ccls-args nil
-   ccls-executable (executable-find "ccls")
-   projectile-project-root-files-top-down-recurring '(append
-						      '("compile_commands.json" ".ccls")
-						      projectile-project-root-files-top-down-recurring)
-   )
+  (use-package ccls
+    :after projectile
+    :config
+    (setq
+     ccls-args nil
+     ccls-executable (executable-find "ccls")
+     ))
 
-  (add-to-list 'projectile-globally-ignored-directories ".ccls-cache")
+  (use-package google-c-style
+    :hook (((c-mode c++-mode) . google-set-c-style)
+	   (c-mode-common . google-make-newline-indent)))
+
+  ;FIXME
+  ;(setq
+  ; projectile-project-root-files-top-down-recurring '(append
+  ;						    '("compile_commands.json" ".ccls")
+  ;						    projectile-project-root-files-top-down-recurring)
+  ; )
+
+  ;(add-to-list 'projectile-globally-ignored-directories ".ccls-cache")
   (add-hook 'c-mode-hook #'google-set-c-style)
   (add-hook 'c++-mode-hook #'google-set-c-style)
   (add-hook 'c-mode-common-hook #'google-make-newline-indent)
