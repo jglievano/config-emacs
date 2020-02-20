@@ -48,8 +48,10 @@
 
 ;(add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 (add-to-list 'custom-theme-load-path (expand-file-name "themes" user-emacs-directory))
-;(let ((default-directory (expand-file-name "site-lisp/" user-emacs-directory)))
-;  (normal-top-level-add-subdirs-to-load-path))
+(let ((default-directory (expand-file-name "site-lisp/" user-emacs-directory)))
+  (normal-top-level-add-subdirs-to-load-path))
+(eval-when-compile
+  (require 'use-package))
 
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file 'noerror)
