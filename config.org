@@ -469,9 +469,52 @@ ln -s Debug/compile_commands.json
 
 * Org-mode
 
+** Plus contributions
+
 #+begin_src emacs-lisp
-  (setq org-todo-keywords '((sequence "todo(t)" "started(s)" "waiting(w@/!)" "someday(.)"
-				      "|"
-				      "done(x!)" "cancelled(c@)")
-			    (sequence "note(n)")))
+  (use-package org
+    :ensure org-plus-contrib
+    :config
+    (setq org-todo-keywords
+	  '((sequence "todo(t)" "started(s)" "waiting(w@/!)" "someday(.)"
+		      "|"
+		      "done(x!)" "cancelled(c@)")
+	    (sequence "note(n)"))))
+#+end_src
+
+** Journal
+
+#+begin_src emacs-lisp
+  (use-package org-journal
+    :bind (("C-c t" . wuff-journal-load-file-today)
+	   ("C-c y" . wuff-journal-load-file-yesterday))
+    :preface
+    (defun wuff-journal-file-today ()
+      "Gets filename for today's journal entry."
+      (let ((daily-name (format-time-string "%Y%m%d")))
+	(expand-file-name (concat org-journal-dir daily-name))))
+
+    (defun wuff-load-journal-file-today ()
+      "Creates and load a journal file based on today's date."
+      (interactive)
+      (find-file (wuff-journal-file-today)))
+
+    (defun wuff-journal-file-yesterday ()
+      "Gets filename of yesterday's journal entry."
+      (let* ((yesterday (time-subtract (current-time) (days-to-time 1)))
+	     (daily-name (format-time-string "%Y%m%d" yesterday)))
+	(expand-file-name (concat org-journal-dir daily-name))))
+
+    (defun wuff-load-journal-file-yesterday ()
+      "Creates and loads a file based on yesterday's date."
+      (interactive)
+      (find-file (wuff-journal-file-yesterday)))
+
+    :config
+    (setq
+     org-journal-dir "~/Nextcloud/Org/journal/"
+     org-journal-file-format "%Y%m%d"
+     org-journal-date-format "%e %b %Y (%A)"
+     org-journal-time-format ""
+     ))
 #+end_src
