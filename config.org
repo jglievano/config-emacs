@@ -37,6 +37,15 @@
   (package-initialize)
 #+end_src
 
+*** use-package
+
+#+begin_src emacs-lisp
+  (eval-when-compile
+    (require 'diminish)
+    (require 'use-package)
+    (setq use-package-always-ensure t))
+#+end_src
+
 *** Better settings
 
 #+begin_src emacs-lisp
@@ -266,13 +275,12 @@
 
 * Development
 
-** Utils
+** LSP
 
 #+begin_src emacs-lisp
   (mapc 'wuff-install-if-needed
 	'(flycheck
 	  company
-	  dap-mode
 	  lsp-ivy
 	  lsp-mode
 	  lsp-treemacs
@@ -302,6 +310,12 @@
    )
 
   (push 'company-lsp company-backends)
+
+  (use-package dap-mode
+    :after lsp-mode
+    :config
+    (dap-mode t)
+    (dap-ui-mode t))
 #+end_src
 
 ** Bash
@@ -474,47 +488,44 @@ ln -s Debug/compile_commands.json
 #+begin_src emacs-lisp
   (use-package org
     :ensure org-plus-contrib
+    :bind (("C-c d" . org-decrypt-entry))
     :config
-    (setq org-todo-keywords
-	  '((sequence "todo(t)" "started(s)" "waiting(w@/!)" "someday(.)"
-		      "|"
-		      "done(x!)" "cancelled(c@)")
-	    (sequence "note(n)"))))
+    (setq
+     org-todo-keywords '((sequence
+			  "todo(t)" "started(s)" "waiting(w@/!)" "someday(.)"
+			  "|"
+			  "done(x!)" "cancelled(c@)")
+			 (sequence "note(n)"))
+     org-tags-exclude-from-inheritance '("crypt")
+     org-crypt-key nil ; TODO replae with key ID.
+     ))
 #+end_src
 
 ** Journal
 
 #+begin_src emacs-lisp
   (use-package org-journal
-    :bind (("C-c t" . wuff-journal-load-file-today)
+    :load-path "site-lisp/org-journal"
+    :bind (("C-c t" . org-journal-new-entry)
 	   ("C-c y" . wuff-journal-load-file-yesterday))
     :preface
-    (defun wuff-journal-file-today ()
-      "Gets filename for today's journal entry."
-      (let ((daily-name (format-time-string "%Y%m%d")))
-	(expand-file-name (concat org-journal-dir daily-name))))
-
-    (defun wuff-load-journal-file-today ()
-      "Creates and load a journal file based on today's date."
-      (interactive)
-      (find-file (wuff-journal-file-today)))
-
     (defun wuff-journal-file-yesterday ()
       "Gets filename of yesterday's journal entry."
       (let* ((yesterday (time-subtract (current-time) (days-to-time 1)))
 	     (daily-name (format-time-string "%Y%m%d" yesterday)))
 	(expand-file-name (concat org-journal-dir daily-name))))
 
-    (defun wuff-load-journal-file-yesterday ()
+    (defun wuff-journal-load-file-yesterday ()
       "Creates and loads a file based on yesterday's date."
       (interactive)
       (find-file (wuff-journal-file-yesterday)))
 
     :config
     (setq
-     org-journal-dir "~/Nextcloud/Org/journal/"
+     org-journal-dir (format "~/Nextcloud/Org/journal/" (format-time-string "%Y"))
      org-journal-file-format "%Y%m%d"
      org-journal-date-format "%e %b %Y (%A)"
      org-journal-time-format ""
+     org-journal-enable-encryption t
      ))
 #+end_src
