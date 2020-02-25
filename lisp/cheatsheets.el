@@ -7,17 +7,9 @@
 (defun get-cheatsheet (cheatsheet)
   "Gets CHEATSHEET."
   (interactive "sOpen cheatsheet: ")
-  (let ((old-buffer (current-buffer))
-	(buffer-name (format "*cheatsheet<%s>*" cheatsheet)))
-    (with-current-buffer-window buffer-name
-	nil
-	nil
-	(lambda ()
-	  (insert "@startuml\n")
-	  (insert "  This is a sample\n")
-	  (insert "@enduml"))
-	)
-    (set-buffer old-buffer)))
+  (let ((buffer-name (format "*cheatsheet<%s>*" cheatsheet)))
+    (with-output-to-temp-buffer buffer-name
+      (princ "@startuml\n  test\n@enduml"))))
 
 (provide 'cheatsheets)
 
