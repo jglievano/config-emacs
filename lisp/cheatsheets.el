@@ -8,7 +8,9 @@
   "Gets CHEATSHEET."
   (interactive "sOpen cheatsheet: ")
   (let ((buffer-name (format "*cheatsheet<%s>*" cheatsheet)))
-    (with-output-to-temp-buffer buffer-name
+    (with-temp-buffer-window buffer-name
+	'(nil (mode . plantuml-mode))
+	nil
       (princ "@startuml\n  test\n@enduml"))))
 
 (provide 'cheatsheets)
