@@ -5,11 +5,12 @@
 ;;; Code:
 
 (defun get-cheatsheet (cheatsheet)
-  "Gets CHEATSHEET."
+  "CHEATSHEET being one of the provided cheatsheets.
+This function will display it read-only and the indicated mode."
   (interactive "sOpen cheatsheet: ")
   (let ((buffer-name (format "*cheatsheet<%s>*" cheatsheet)))
     (with-temp-buffer-window buffer-name
-	'(nil (mode . plantuml-mode))
+	'(display-buffer-at-bottom (mode . '(plantuml-mode read-only-mode)))
 	nil
       (princ "@startuml\n  test\n@enduml"))))
 

@@ -346,35 +346,31 @@
 
   (use-package ccls
     :after projectile
+    :hook ((c-mode c++-mode objc-mode) . (lambda () (require 'ccls) (lsp)))
     :config
     (setq
      ccls-args nil
      ccls-executable (executable-find "ccls")
-     ))
+     projectile-project-root-files-top-down-recurring (append '("compile_commands.json" ".ccls")
+							      projectile-project-root-files-top-down-recurring)
+     )
+    (add-to-list 'projectile-globally-ignored-directories ".ccls-cache"))
 
   (use-package google-c-style
     :hook (((c-mode c++-mode) . google-set-c-style)
 	   (c-mode-common . google-make-newline-indent)))
-
-  ;FIXME
-  ;(setq
-  ; projectile-project-root-files-top-down-recurring '(append
-  ;						    '("compile_commands.json" ".ccls")
-  ;						    projectile-project-root-files-top-down-recurring)
-  ; )
-
-  ;(add-to-list 'projectile-globally-ignored-directories ".ccls-cache")
-  (add-hook 'c-mode-hook #'google-set-c-style)
-  (add-hook 'c++-mode-hook #'google-set-c-style)
-  (add-hook 'c-mode-common-hook #'google-make-newline-indent)
 #+end_src
 
-In order to allow ~ccls~ to know the dependencies, provide a ~compile.commands.json~ file:
+Remember to provide a ~compile_commands.json~ at the root of a C++ project.
+
+If there's a ~CMakeLists.txt~ then I can use ~cmake~ to generate it:
 
 #+begin_src bash
 cmakd -H. -BDebug -DCMAKE_BUILD_TYPE=debug -DCMAKE_EXPORT_COMPILE_COMMANDS=YES
 ln -s Debug/compile_commands.json
 #+end_src
+
+Otherwise, I'm doomed... for now (I'll have to figure it out).
 
 ** Plantuml
 
