@@ -28,13 +28,17 @@
 *** Package archives
 
 #+begin_src emacs-lisp
-  (require 'package)
+  (cond
+   ((>= 24 emacs-major-version)
+    (require 'package)
+    (package-initialize)
+    (package-refresh-contents)))
+
   (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
 			   ("marmalade" . "https://jorgenschaefer.github.io/packages/")
 			   ("melpa" . "https://melpa.org/packages/")
 			   ("melpa-stable" . "https://stable.melpa.org/packages/")
 			   ("org" . "https://orgmode.org/elpa/")))
-  (package-initialize)
 #+end_src
 
 *** use-package
@@ -338,6 +342,7 @@
 
 #+begin_src emacs-lisp
   (use-package cc-mode
+    :disabled
     :config
     (setq
      c-basic-offset 2
@@ -363,14 +368,112 @@
 
 Remember to provide a ~compile_commands.json~ at the root of a C++ project.
 
-If there's a ~CMakeLists.txt~ then I can use ~cmake~ to generate it:
+When using ~cmake~:
 
 #+begin_src bash
 cmakd -H. -BDebug -DCMAKE_BUILD_TYPE=debug -DCMAKE_EXPORT_COMPILE_COMMANDS=YES
 ln -s Debug/compile_commands.json
 #+end_src
 
-Otherwise, I'm doomed... for now (I'll have to figure it out).
+When using ~bear~:
+
+#+begin_src bash
+bear make
+#+end_src
+
+When using ~ninja~:
+
+#+begin_src bash
+ninja -C out/Release -t compdb cxx cc > compile_commands.json
+#+end_src
+
+When using ~xcodebuild~, make sure to install ~xcpretty~ first:
+
+#+begin_src bash
+xcodebuild | xcpretty -r json-compilation-database --output compile_commands.json
+#+end_src
+
+When in doubt, take a look at [[https://github.com/MaskRay/ccls/wiki/Project-Setup]].
+
+** JavaScript
+
+Great setup from Doom Emacs:
+[[https://github.com/hlissner/doom-emacs/blob/develop/modules/lang/javascript/config.el]]
+
+I'll probably try to bring as much as I can from there.
+
+#+begin_src emacs-lisp
+  (use-package coffee-mode
+    :config
+    (custom-set-variables '(coffee-tab-width 2)))
+
+  (use-package eslintd-fix
+    :after js2-mode
+    :config
+    (add-hook 'js2-mode-hook 'eslintd-fix-mode))
+
+  (use-package js2-mode
+    :mode "\\.m?js\\'"
+    :interpreter "node"
+    :commands js2-line-break
+    :config
+    (setq
+     js-chain-indent t
+     js2-skip-preprocessor-directives t
+     js2-mode-show-parse-errors nil
+     js2-mode-show-strict-warnings nil
+     js2-strict-trailing-comma-warning nil
+     js2-strict-missing-semi-warning nil
+     js2-highlight-level 3
+     js2-highlight-external-variables t
+     js2-idle-timer-delay 0.1
+     )
+    (add-hook 'js2-mode-hook #'rainbow-delimiters-mode))
+
+  (use-package js2-refactor)
+
+  (use-package nodejs-repl
+    :after js2-mode
+    :config
+    (defun nvm-which ()
+      (let* ((shell (concat (getenv "SHELL") " -l -c 'nvm which'"))
+	     (output (shell-command-to-string shell)))
+	(cadr (split-string output "[\n]+" t))))
+    (setq nodejs-repl-command #'nvm-which)
+    (add-hook 'js-mode-hook
+	      (lambda ()
+		(define-key js-mode-map (kbd "C-x C-e") 'nodejs-repl-send-last-expression)
+		(define-key js-mode-map (kbd "C-c C-j") 'nodejs-repl-send-line)
+		(define-key js-mode-map (kbd "C-c C-r") 'nodejs-repl-send-region)
+		(define-key js-mode-map (kbd "C-c C-l") 'nodejs-repl-load-file)
+		(define-key js-mode-map (kbd "C-c C-z") 'nodejs-repl-switch-to-repl))))
+
+  (use-package npm-mode
+    :hook ((js-mode typescript-mode) . npm-mode))
+
+  (use-package rjsx-mode
+    :mode "components/.+\\.js$"
+    :init
+    (defun wuff-javascript-jsx-file-p ()
+      "Detect React or preact imports early in the file."
+      (and buffer-file-name
+	   (string= (file-name-extension buffer-file-name) "js")
+	   (re-search-forward "\\(^\\s-*import +React\\|\\( from \\|require(\\)[\"']p?react\\)"
+			      magic-mode-regexp-match-limit t)
+	   (progn (goto-char (match-beginning 1))
+		  (not (sp-point-in-string-or-comment)))))
+    (add-to-list 'magic-mode-alist '(wuff-javascript-jsx-file-p . rjsx-mode)))
+
+  (use-package skewer-mode)
+
+  (use-package tide
+    :config
+    (add-hook 'js2-mode-hook #'setup-tide-mode)
+    (flycheck-add-next-checker 'javascript-eslint 'javascript-tide 'append))
+
+  (use-package typescript-mode :defer t)
+  (use-package xref-js2 :defer t)
+#+end_src
 
 ** Plantuml
 
@@ -403,14 +506,14 @@ Otherwise, I'm doomed... for now (I'll have to figure it out).
 ** Ruby
 
 #+begin_src emacs-lisp
-  (wuff-install-if-needed 'ruby-mode)
-
-  (add-to-list 'auto-mode-alist '("\\.rake$" . ruby-mode))
-  (add-to-list 'auto-mode-alist '("\\.gemspec$" . ruby-mode))
-  (add-to-list 'auto-mode-alist '("\\.ru$" . ruby-mode))
-  (add-to-list 'auto-mode-alist '("(Release)?Fastfile$" . ruby-mode))
-  (add-to-list 'auto-mode-alist '("(App|Cap|Gem|Guard|Match|Rake)file$" . ruby-mode))
-  (add-to-list 'auto-mode-alist '("Vagrantfile(.local)?$" . ruby-mode))
+  (use-package ruby-mode
+    :disabled
+    :mode (("\\.rake$" . ruby-mode)
+	   ("\\.gemspec$" . ruby-mode)
+	   ("\\.ru$" . ruby-mode)
+	   ("(Release)?Fastfile$" . ruby-mode)
+	   ("(App|Cap|Gem|Guard|Match|Rake)file$" . ruby-mode)
+	   ("Vagrantfile(.local)?$" . ruby-mode)))
 #+end_src
 
 ** Rust
@@ -440,41 +543,34 @@ Otherwise, I'm doomed... for now (I'll have to figure it out).
 ** Web
 
 #+begin_src emacs-lisp
-  (mapc 'wuff-install-if-needed
-	'(css-mode
-	  js2-mode
-	  js2-refactor
-	  scss-mode
-	  web-mode))
+  (use-package css-mode
+    :disabled
+    :config
+    (setq css-indent-offset 2))
 
-  (setq css-indent-offset 2)
+  (use-package scss-mode
+    :mode "\\.s[ac]ss\\'")
 
-  (defun wuff-web-mode-indent ()
-    (setq
-     web-mode-markup-indent-offset 2
-     web-mode-css-indent-offset 2
-     web-mode-code-indent-offset 2
-     ))
-
-  (add-hook 'js2-mode-hook #'js2-imenu-extras-mode)
-  (add-hook 'js2-mode-hook #'js2-refactor-mode)
-  (add-hook 'web-mode-hook 'wuff-web-mode-indent)
-
-  (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
-  (add-to-list 'auto-mode-alist '("\\.s[ac]ss\\'" . scss-mode))
-  (add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.tpl\\.php\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.[agj]sp\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.as[cp]x\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.njk\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.hbs\\'" . web-mode))
-
-  (js2r-add-keybindings-with-prefix "C-c C-r")
-  (define-key js2-mode-map (kbd "C-k") #'js2r-kill)
+  (use-package web-mode
+    :mode (("\\.phtml\\'" . web-mode)
+	   ("\\.tpl\\.php\\'" . web-mode)
+	   ("\\.[agj]sp\\'" . web-mode)
+	   ("\\.as[cp]x\\'" . web-mode)
+	   ("\\.erb\\'" . web-mode)
+	   ("\\.mustache\\'" . web-mode)
+	   ("\\.djhtml\\'" . web-mode)
+	   ("\\.html?\\'" . web-mode)
+	   ("\\.njk\\'" . web-mode)
+	   ("\\.hbs\\'" . web-mode))
+    :init
+    (defun wuff-web-mode-indent ()
+      (setq
+       web-mode-markup-indent-offset 2
+       web-mode-css-indent-offset 2
+       web-mode-code-indent-offset 2
+       ))
+    :config
+    (add-hook 'web-mode-hook 'wuff-web-mode-indent))
 #+end_src
 
 * Org-mode
