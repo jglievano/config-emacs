@@ -5,19 +5,19 @@
 * Functions
 
 #+begin_src emacs-lisp
-  (defun wuff-what-face (pos)
+  (defun jgl/what-face (pos)
     "Get font face under POS."
     (interactive "d")
     (let ((face (or (get-char-property (point) 'read-face-name)
 		    (get-char-property (point) 'face))))
       (if face (message "Face: %s" face) (message "No face at %d" pos))))
 
-  (defun wuff-install-if-needed (pkg)
+  (defun jgl/install-if-needed (pkg)
     "Installs PKG if not installed yet."
     (unless (package-installed-p pkg)
       (package-install pkg)))
 
-  (defun wuff-add-exec-path (path)
+  (defun jgl/add-exec-path (path)
     "Adds PATH to environment's PATH."
     (setenv "PATH" (concat (getenv "PATH") ":" path))
     (setq exec-path (append exec-path (list path))))
@@ -74,7 +74,7 @@
 #+begin_src emacs-lisp
   (if (memq window-system '(mac ns))
       (progn
-	(wuff-install-if-needed 'exec-path-from-shell)
+	(jgl/install-if-needed 'exec-path-from-shell)
 	(setq exec-path-from-shell-check-startup-files nil)
 	(exec-path-from-shell-initialize))
     nil)
@@ -92,7 +92,7 @@
 ** UI essentials
 
 #+begin_src emacs-lisp
-  (wuff-install-if-needed 'all-the-icons)
+  (jgl/install-if-needed 'all-the-icons)
   (require 'all-the-icons)
 
   ;; Needed to allow full-height screen.
@@ -144,7 +144,7 @@
       (require 'cl-lib)
     (require 'cl))
 
-  (defun wuff-shortened-path (path max-len)
+  (defun jgl/shortened-path (path max-len)
     "Return a modified version of PATH, replacing some components
   with single characters starting from the left to try and get the
   path down to MAX-LEN."
@@ -161,25 +161,25 @@
 	     components (cdr components)))
       (concat str (cl-reduce (lambda (a b) (concat a "/" b)) components))))
 
-  (defun wuff-with-face (str &rest face-plist)
+  (defun jgl/with-face (str &rest face-plist)
     "Propertize FACE-PLIST to STR."
     (propertize str 'face face-plist))
 
-  (defun wuff-vc-prompt-info ()
+  (defun jgl/vc-prompt-info ()
     "String printed in eshell prompt for version control."
     (if (ignore-errors (vc-responsible-backend default-directory))
 	(format "%s %s\n"
 		(all-the-icons-octicon "git-branch" :height 0.8 :v-adjust 0.1)
-		(wuff-with-face (magit-get-current-branch) `(:foreground "#b8bb26")))
+		(jgl/with-face (magit-get-current-branch) `(:foreground "#b8bb26")))
       ""))
 
   (setq eshell-prompt-function
 	(lambda ()
 	  (format "\n%s[%s@%s %s]%s "
-		  (wuff-vc-prompt-info)
-		  (wuff-with-face user-login-name `(:foreground "#fabd2f"))
-		  (wuff-with-face system-name `(:foreground "#cc241d"))
-		  (wuff-with-face (wuff-shortened-path (eshell/pwd) 40) `(:foreground "#83a598"))
+		  (jgl/vc-prompt-info)
+		  (jgl/with-face user-login-name `(:foreground "#fabd2f"))
+		  (jgl/with-face system-name `(:foreground "#cc241d"))
+		  (jgl/with-face (jgl/shortened-path (eshell/pwd) 40) `(:foreground "#83a598"))
 		  (if (= (user-uid) 0) "#" "$"))))
 
   (setq eshell-hist-ignoredups t
@@ -193,7 +193,7 @@
 ** Swiper (and Ivy, Counsel)
 
 #+begin_src emacs-lisp
-  (mapc 'wuff-install-if-needed
+  (mapc 'jgl/install-if-needed
 	'(counsel
 	  ivy
 	  swiper))
@@ -222,14 +222,14 @@
 ** Magit
 
 #+begin_src emacs-lisp
-  (wuff-install-if-needed 'magit)
+  (jgl/install-if-needed 'magit)
   (require 'magit)
 #+end_src
 
 ** Projectile
 
 #+begin_src emacs-lisp
-  (mapc 'wuff-install-if-needed
+  (mapc 'jgl/install-if-needed
 	'(projectile
 	  counsel-projectile))
 
@@ -242,21 +242,21 @@
 ** Rainbow delimiters
 
 #+begin_src emacs-lisp
-  (wuff-install-if-needed 'rainbow-delimiters)
+  (jgl/install-if-needed 'rainbow-delimiters)
   (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
 #+end_src
 
 ** Rainbow mode
 
 #+begin_src emacs-lisp
-  (wuff-install-if-needed 'rainbow-mode)
+  (jgl/install-if-needed 'rainbow-mode)
   (add-hook 'prog-mode-hook #'rainbow-mode)
 #+end_src
 
 ** Smex
 
 #+begin_src emacs-lisp
-  (wuff-install-if-needed 'smex)
+  (jgl/install-if-needed 'smex)
 
   (require 'smex)
   (smex-initialize)
@@ -267,7 +267,7 @@
 ** Which-key
 
 #+begin_src emacs-lisp
-  (wuff-install-if-needed 'which-key)
+  (jgl/install-if-needed 'which-key)
 
   (require 'which-key)
   (setq which-key-add-column-padding 1
@@ -286,24 +286,26 @@
 ** LSP
 
 #+begin_src emacs-lisp
-  (mapc 'wuff-install-if-needed
+  (use-package lsp-mode
+    :init (setq lsp-keymap-prefix "C-l")
+    :commands (lsp lsp-deferred))
+
+  (mapc 'jgl/install-if-needed
 	'(flycheck
 	  company
 	  lsp-ivy
-	  lsp-mode
 	  lsp-treemacs
 	  lsp-ui
 	  company-lsp))
 
-  (require 'lsp-mode)
   (require 'lsp-ui)
   (require 'company-lsp)
 
-  (defun wuff-disable-flycheck-in-org-src-block ()
+  (defun jgl/disable-flycheck-in-org-src-block ()
     (setq-local flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
 
   (add-hook 'prog-mode-hook #'flycheck-mode)
-  (add-hook 'org-src-mode-hook 'wuff-disable-flycheck-in-org-src-block)
+  (add-hook 'org-src-mode-hook 'jgl/disable-flycheck-in-org-src-block)
   (add-hook 'prog-mode-hook #'company-mode)
 
   (setq flycheck-display-errors-delay .3)
@@ -335,7 +337,7 @@
 ** Bazel
 
 #+begin_src emacs-lisp
-  (wuff-install-if-needed 'bazel-mode)
+  (jgl/install-if-needed 'bazel-mode)
 
   (add-to-list 'auto-mode-alist '("\\.bzl\\'" . bazel-mode))
   (add-to-list 'auto-mode-alist '("BUILD(\\.bazel)?$" . bazel-mode))
@@ -458,7 +460,7 @@ I'll probably try to bring as much as I can from there.
   (use-package rjsx-mode
     :mode "components/.+\\.js$"
     :init
-    (defun wuff-javascript-jsx-file-p ()
+    (defun jgl/javascript-jsx-file-p ()
       "Detect React or preact imports early in the file."
       (and buffer-file-name
 	   (string= (file-name-extension buffer-file-name) "js")
@@ -466,7 +468,7 @@ I'll probably try to bring as much as I can from there.
 			      magic-mode-regexp-match-limit t)
 	   (progn (goto-char (match-beginning 1))
 		  (not (sp-point-in-string-or-comment)))))
-    (add-to-list 'magic-mode-alist '(wuff-javascript-jsx-file-p . rjsx-mode)))
+    (add-to-list 'magic-mode-alist '(jgl/javascript-jsx-file-p . rjsx-mode)))
 
   (use-package skewer-mode)
 
@@ -482,7 +484,7 @@ I'll probably try to bring as much as I can from there.
 ** Plantuml
 
 #+begin_src emacs-lisp
-  (wuff-install-if-needed 'plantuml-mode)
+  (jgl/install-if-needed 'plantuml-mode)
 
   (setq plantuml-jar-path (expand-file-name "~/.local/bin/plantuml.1.2020.0.jar")
 	plantuml-default-exec-mode 'jar)
@@ -493,18 +495,18 @@ I'll probably try to bring as much as I can from there.
 ** Python
 
 #+begin_src emacs-lisp
-  (mapc 'wuff-install-if-needed
+  (mapc 'jgl/install-if-needed
 	'(lsp-python-ms
 	  python-mode))
 
   (add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
   (add-to-list 'auto-mode-alist '("BUCK$" . python-mode))
 
-  (defun wuff-python-mode-lsp ()
+  (defun jgl/python-mode-lsp ()
     (require 'lsp-python-ms)
     (lsp-deferred))
 
-  (add-hook 'python-mode-hook 'wuff-python-mode-lsp)
+  (add-hook 'python-mode-hook 'jgl/python-mode-lsp)
 #+end_src
 
 ** Ruby
@@ -524,9 +526,9 @@ I'll probably try to bring as much as I can from there.
 
 #+begin_src emacs-lisp
   (defvar cargo-path (expand-file-name ".cargo/bin" "~/"))
-  (wuff-add-exec-path cargo-path)
+  (jgl/add-exec-path cargo-path)
 
-  (mapc 'wuff-install-if-needed
+  (mapc 'jgl/install-if-needed
 	'(toml-mode
 	  rust-mode
 	  cargo
@@ -540,7 +542,7 @@ I'll probably try to bring as much as I can from there.
 ** Swift
 
 #+begin_src emacs-lisp
-  (wuff-install-if-needed 'swift-mode)
+  (jgl/install-if-needed 'swift-mode)
   (add-to-list 'auto-mode-alist '("\\.swift\\'" . swift-mode))
 #+end_src
 
@@ -567,14 +569,14 @@ I'll probably try to bring as much as I can from there.
 	   ("\\.njk\\'" . web-mode)
 	   ("\\.hbs\\'" . web-mode))
     :init
-    (defun wuff-web-mode-indent ()
+    (defun jgl/web-mode-indent ()
       (setq
        web-mode-markup-indent-offset 2
        web-mode-css-indent-offset 2
        web-mode-code-indent-offset 2
        ))
     :config
-    (add-hook 'web-mode-hook 'wuff-web-mode-indent))
+    (add-hook 'web-mode-hook 'jgl/web-mode-indent))
 #+end_src
 
 * Org-mode
@@ -603,18 +605,18 @@ I'll probably try to bring as much as I can from there.
   (use-package org-journal
     :load-path "site-lisp/org-journal"
     :bind (("C-c t" . org-journal-new-entry)
-	   ("C-c y" . wuff-journal-load-file-yesterday))
+	   ("C-c y" . jgl/journal-load-file-yesterday))
     :preface
-    (defun wuff-journal-file-yesterday ()
+    (defun jgl/journal-file-yesterday ()
       "Gets filename of yesterday's journal entry."
       (let* ((yesterday (time-subtract (current-time) (days-to-time 1)))
 	     (daily-name (format-time-string "%Y%m%d" yesterday)))
 	(expand-file-name (concat org-journal-dir daily-name))))
 
-    (defun wuff-journal-load-file-yesterday ()
+    (defun jgl/journal-load-file-yesterday ()
       "Creates and loads a file based on yesterday's date."
       (interactive)
-      (find-file (wuff-journal-file-yesterday)))
+      (find-file (jgl/journal-file-yesterday)))
 
     :config
     (setq
