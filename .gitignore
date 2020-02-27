@@ -5,9 +5,11 @@ elpa/
 eshell/
 transient/
 
+.dap-breakpoints
 .lsp-session-v1
 config.el
 custom.el
 projectile-bookmarks.eld
 recentf
 smex-items
+tramp
