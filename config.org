@@ -130,7 +130,8 @@
 *** Theme
 
 #+begin_src emacs-lisp
-  (load-theme 'papercolor t)
+  (load-theme 'flatland t)
+  ;(load-theme 'papercolor t)
 #+end_src
 
 ** Eshell
