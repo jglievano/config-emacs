@@ -130,7 +130,10 @@
 *** Theme
 
 #+begin_src emacs-lisp
-  (load-theme 'flatland t)
+  (use-package moe-theme
+    :config
+    (moe-dark))
+  ;(load-theme 'flatland t)
   ;(load-theme 'papercolor t)
 #+end_src
 
