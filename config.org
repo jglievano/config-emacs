@@ -293,40 +293,42 @@
 ** LSP
 
 #+begin_src emacs-lisp
+  (use-package company
+    :diminish
+    :pin melpa-stable
+    :config
+    (setq
+     company-dabbrev-ignore-case nil
+     company-dabbrev-downcase nil
+     company-idle-delay 1.0
+     company-minimum-prefix-length 2
+     company-show-numbers t
+     company-tooltip-align-annotations t
+     )
+    (use-package company-lsp
+      :after lsp-mode
+      :config
+      (push 'company-lsp company-backends)))
+
   (use-package lsp-mode
     :init (setq lsp-keymap-prefix "C-l")
     :commands (lsp lsp-deferred))
 
   (mapc 'jgl/install-if-needed
 	'(flycheck
-	  company
 	  lsp-ivy
 	  lsp-treemacs
-	  lsp-ui
-	  company-lsp))
+	  lsp-ui))
 
   (require 'lsp-ui)
-  (require 'company-lsp)
 
   (defun jgl/disable-flycheck-in-org-src-block ()
     (setq-local flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
 
   (add-hook 'prog-mode-hook #'flycheck-mode)
   (add-hook 'org-src-mode-hook 'jgl/disable-flycheck-in-org-src-block)
-  (add-hook 'prog-mode-hook #'company-mode)
 
   (setq flycheck-display-errors-delay .3)
-
-  (setq
-   company-dabbrev-ignore-case nil
-   company-dabbrev-downcase nil
-   company-idle-delay .25
-   company-minimum-prefix-length 2
-   company-show-numbers t
-   company-tooltip-align-annotations t
-   )
-
-  (push 'company-lsp company-backends)
 
   (use-package dap-mode
     :after lsp-mode
