@@ -304,31 +304,31 @@
      company-minimum-prefix-length 2
      company-show-numbers t
      company-tooltip-align-annotations t
-     )
-    (use-package company-lsp
-      :after lsp-mode
-      :config
-      (push 'company-lsp company-backends)))
+     ))
+
+  (use-package company-lsp :commands company-lsp)
+
+  (use-package flycheck
+    :commands flycheck
+    :preface
+    (defun jgl/disable-flycheck-in-org-src-block ()
+      (setq-local flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
+    :config
+    (global-flycheck-mode)
+    (add-hook 'org-src-mode-hook 'jgl/disable-flycheck-in-org-src-block)
+    (setq flycheck-display-errors-delay .3))
 
   (use-package lsp-mode
     :init (setq lsp-keymap-prefix "C-l")
+    :hook ((c-mode . lsp-deferred)
+	   (c++-mode . (lambda () (require 'ccls) (lsp-deferred)))
+	   (rust-mode . lsp-deferred)
+	   (lsp-mode . lsp-enable-which-key-integration))
     :commands (lsp lsp-deferred))
 
-  (mapc 'jgl/install-if-needed
-	'(flycheck
-	  lsp-ivy
-	  lsp-treemacs
-	  lsp-ui))
-
-  (require 'lsp-ui)
-
-  (defun jgl/disable-flycheck-in-org-src-block ()
-    (setq-local flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
-
-  (add-hook 'prog-mode-hook #'flycheck-mode)
-  (add-hook 'org-src-mode-hook 'jgl/disable-flycheck-in-org-src-block)
-
-  (setq flycheck-display-errors-delay .3)
+  (use-package lsp-ivy :commands lsp-ui-mode)
+  (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+  (use-package lsp-ui :commands lsp-ui-mode)
 
   (use-package dap-mode
     :after lsp-mode
@@ -366,7 +366,6 @@
 
   (use-package ccls
     :after projectile
-    :hook ((c-mode c++-mode objc-mode) . (lambda () (require 'ccls) (lsp)))
     :config
     (setq
      ccls-args nil
@@ -409,6 +408,39 @@ xcodebuild | xcpretty -r json-compilation-database --output compile_commands.jso
 #+end_src
 
 When in doubt, take a look at [[https://github.com/MaskRay/ccls/wiki/Project-Setup]].
+
+** CMake
+
+#+begin_src emacs-lisp
+  (use-package cmake-mode
+    :mode ("CMakeLists\\.txt\\'"
+	   "\\.cmake\\'"))
+
+  (use-package cmake-font-lock
+    :after (cmake-mode)
+    :hook (cmake-mode . cmake-font-lock-activate))
+
+  (use-package cmake-ide
+    :after projectile
+    :hook (c++-mode . jgl/cmake-ide-find-project)
+    :preface
+    (defun jgl/cmake-ide-find-project ()
+      "Finds the directory of the project for cmake-ide."
+      (with-eval-after-load 'projectile
+	(setq
+	 cmake-ide-project-dir (projectile-project-root)
+	 cmake-ide-build-dir (concat cmake-ide-project-dir "build")))
+      (setq
+       cmake-ide-compile-command (concat "cd "
+					 cmake-ide-build-dir
+					 " && cmake .. && make")))
+    (defun jgl/switch-to-compilation-window ()
+      "Switches to the *compilation* buffer."
+      (other-window 1))
+    :bind ([remap comment-region] . cmake-ide-compile)
+    :init (cmake-ide-setup)
+    :config (advice-add 'cmake-ide-compile :after #'jgl/switch-to-compilation-window))
+#+end_src
 
 ** JavaScript
 
@@ -543,7 +575,6 @@ I'll probably try to bring as much as I can from there.
 	  cargo
 	  flycheck-rust))
 
-  (add-hook 'rust-mode-hook #'lsp-deferred)
   (add-hook 'rust-mode-hook #'cargo-minor-mode)
   (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)
 #+end_src
