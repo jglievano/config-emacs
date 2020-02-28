@@ -229,14 +229,15 @@
 ** Projectile
 
 #+begin_src emacs-lisp
-  (mapc 'jgl/install-if-needed
-	'(projectile
-	  counsel-projectile))
-
-  (projectile-mode +1)
+  (use-package projectile
+    :diminish
+    :config
+    (projectile-mode +1)
+    (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
+    (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
+  
+  (jgl/install-if-needed 'counsel-projectile)
   (counsel-projectile-mode)
-  (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
-  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
 #+end_src
 
 ** Rainbow delimiters
@@ -249,8 +250,9 @@
 ** Rainbow mode
 
 #+begin_src emacs-lisp
-  (jgl/install-if-needed 'rainbow-mode)
-  (add-hook 'prog-mode-hook #'rainbow-mode)
+  (use-package rainbow-mode
+    :diminish
+    :hook prog-mode)
 #+end_src
 
 ** Smex
