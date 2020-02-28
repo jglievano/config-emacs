@@ -385,7 +385,7 @@ Remember to provide a ~compile_commands.json~ at the root of a C++ project.
 When using ~cmake~:
 
 #+begin_src bash
-cmakd -H. -BDebug -DCMAKE_BUILD_TYPE=debug -DCMAKE_EXPORT_COMPILE_COMMANDS=YES
+cmake -H. -BDebug -DCMAKE_BUILD_TYPE=debug -DCMAKE_EXPORT_COMPILE_COMMANDS=YES
 ln -s Debug/compile_commands.json
 #+end_src
 
