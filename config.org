@@ -53,9 +53,13 @@
 *** Better settings
 
 #+begin_src emacs-lisp
-  (setq ad-redefinition-action 'accept
-	auto-save-default nil
-	create-lockfiles nil)
+  (setq
+   ad-redefinition-action 'accept
+   auto-save-default nil
+   create-lockfiles nil
+   )
+
+  (defalias 'yes-or-no-p 'y-or-n-p)
 #+end_src
 
 *** Emacs local dir
@@ -630,9 +634,9 @@ I'll probably try to bring as much as I can from there.
     :config
     (setq
      org-todo-keywords '((sequence
-			  "todo(t)" "started(s)" "waiting(w@/!)" "someday(.)"
+			  "BACKLOG(b)" "NEW(s)" "WIP(w)" "TESTING(t)" "REVIEW(r)"
 			  "|"
-			  "done(x!)" "cancelled(c@)")
+			  "DONE(x!)" "CANCELLED(c@)")
 			 (sequence "note(n)"))
      org-tags-exclude-from-inheritance '("crypt")
      org-crypt-key nil ; TODO replae with key ID.
@@ -657,13 +661,9 @@ I'll probably try to bring as much as I can from there.
       "Creates and loads a file based on yesterday's date."
       (interactive)
       (find-file (jgl/journal-file-yesterday)))
-
     :config
-    (setq
-     org-journal-dir (format "~/Nextcloud/Org/journal/" (format-time-string "%Y"))
-     org-journal-file-format "%Y%m%d"
-     org-journal-date-format "%e %b %Y (%A)"
-     org-journal-time-format ""
-     org-journal-enable-encryption t
+    (customize-set-variable
+     org-journal-dir (expand-file-name "~/Nextcloud/Org/journal/")
      ))
+
 #+end_src
