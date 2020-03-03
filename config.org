@@ -634,12 +634,12 @@ I'll probably try to bring as much as I can from there.
     :config
     (setq
      org-todo-keywords '((sequence
-			  "BACKLOG(b)" "NEW(s)" "WIP(w)" "TESTING(t)" "REVIEW(r)"
+			  "BACKLOG(b)" "STUDY(s)" "WIP(w)" "REVIEW(r)"
 			  "|"
 			  "DONE(x!)" "CANCELLED(c@)")
 			 (sequence "note(n)"))
      org-tags-exclude-from-inheritance '("crypt")
-     org-crypt-key nil ; TODO replae with key ID.
+     org-crypt-key "0249521EFC5A93D975179A21AF978A7E6599B8D1"
      ))
 #+end_src
 
@@ -662,8 +662,6 @@ I'll probably try to bring as much as I can from there.
       (interactive)
       (find-file (jgl/journal-file-yesterday)))
     :config
-    (customize-set-variable
-     org-journal-dir (expand-file-name "~/Nextcloud/Org/journal/")
-     ))
+    (setq org-journal-enable-encryption t))
 
 #+end_src
