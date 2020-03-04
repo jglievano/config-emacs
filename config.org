@@ -662,6 +662,6 @@ I'll probably try to bring as much as I can from there.
       (interactive)
       (find-file (jgl/journal-file-yesterday)))
     :config
-    (setq org-journal-enable-encryption t))
+    (setq org-journal-enable-encryption nil))
 
 #+end_src
