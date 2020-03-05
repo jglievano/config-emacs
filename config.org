@@ -458,46 +458,18 @@ I'll probably try to bring as much as I can from there.
     :config
     (custom-set-variables '(coffee-tab-width 2)))
 
-  (use-package eslintd-fix
-    :after js2-mode
-    :config
-    (add-hook 'js2-mode-hook 'eslintd-fix-mode))
-
   (use-package js2-mode
-    :mode "\\.m?js\\'"
+    :mode "\\.js\\'"
     :interpreter "node"
     :commands js2-line-break
+    :hook (js2-mode-hook . rainbow-delimiters-mode)
     :config
-    (setq
-     js-chain-indent t
-     js2-skip-preprocessor-directives t
-     js2-mode-show-parse-errors nil
-     js2-mode-show-strict-warnings nil
-     js2-strict-trailing-comma-warning nil
-     js2-strict-missing-semi-warning nil
-     js2-highlight-level 3
-     js2-highlight-external-variables t
-     js2-idle-timer-delay 0.1
-     )
-    (add-hook 'js2-mode-hook #'rainbow-delimiters-mode))
+    (setq-default
+     indent-tabs-mode nil
+     tab-width 2
+     js2-basic-offset 2))
 
-  (use-package js2-refactor)
-
-  (use-package nodejs-repl
-    :after js2-mode
-    :config
-    (defun nvm-which ()
-      (let* ((shell (concat (getenv "SHELL") " -l -c 'nvm which'"))
-	     (output (shell-command-to-string shell)))
-	(cadr (split-string output "[\n]+" t))))
-    (setq nodejs-repl-command #'nvm-which)
-    (add-hook 'js-mode-hook
-	      (lambda ()
-		(define-key js-mode-map (kbd "C-x C-e") 'nodejs-repl-send-last-expression)
-		(define-key js-mode-map (kbd "C-c C-j") 'nodejs-repl-send-line)
-		(define-key js-mode-map (kbd "C-c C-r") 'nodejs-repl-send-region)
-		(define-key js-mode-map (kbd "C-c C-l") 'nodejs-repl-load-file)
-		(define-key js-mode-map (kbd "C-c C-z") 'nodejs-repl-switch-to-repl))))
+  (use-package js2-refactor :defer t)
 
   (use-package npm-mode
     :hook ((js-mode typescript-mode) . npm-mode))
@@ -515,15 +487,19 @@ I'll probably try to bring as much as I can from there.
 		  (not (sp-point-in-string-or-comment)))))
     (add-to-list 'magic-mode-alist '(jgl/javascript-jsx-file-p . rjsx-mode)))
 
-  (use-package skewer-mode)
-
-  (use-package tide
-    :config
-    (add-hook 'js2-mode-hook #'setup-tide-mode)
-    (flycheck-add-next-checker 'javascript-eslint 'javascript-tide 'append))
-
   (use-package typescript-mode :defer t)
-  (use-package xref-js2 :defer t)
+#+end_src
+
+** JSON
+
+#+begin_src emacs-lisp
+  (use-package json-mode
+    :mode "\\.json\\'"
+    :preface
+    (defun jgl/setup-json-mode ()
+      (make-local-variable 'js-indent-level)
+      (setq js-indent-level 2))
+    :hook (json-mode-hook . jgl/setup-json-mode))
 #+end_src
 
 ** Plantuml
