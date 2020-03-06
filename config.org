@@ -608,7 +608,6 @@ I'll probably try to bring as much as I can from there.
       (tide-hl-identifier-mode +1))
     :config
     (add-hook 'web-mode-hook 'jgl/web-mode-setup)
-    (add-hook 'web-mode-hook 'variable-pitch-mode)
     (add-hook 'web-mode-hook 'company-mode)
     (add-hook 'web-mode-hook 'prettier-js-mode)
 
