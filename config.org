@@ -136,7 +136,8 @@
 #+begin_src emacs-lisp
   (use-package moe-theme
     :config
-    (moe-dark))
+    (moe-dark)
+    (moe-theme-set-color 'orange))
   ;(load-theme 'flatland t)
   ;(load-theme 'papercolor t)
 #+end_src
